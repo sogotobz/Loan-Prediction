@@ -1,0 +1,61 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, classification_report
+
+# Load the dataset
+df=pd.read_csv(r"C:\Users\sogot\Downloads\loan_default\Loan_default.csv")
+print(df.head())
+print(df.columns)
+print(df.describe())
+print(df.info())
+print(df.isnull().sum())
+print("Sum of Income:", df['Income'].sum())
+print("Mean of Income:", df['Income'].mean())
+print("Median of Income:", df['Income'].median())
+print("Age Value Counts:")
+print(df['Age'].value_counts())
+
+
+# Data Visualization
+plt.figure(figsize=(10,6))
+sns.histplot(df['LoanAmount'], bins=30, kde=True)
+plt.title('Distribution of Loan Amount')
+plt.xlabel('Loan Amount')
+plt.ylabel('Frequency')
+plt.show()
+
+
+plt.figure(figsize=(10,6))
+sns.scatterplot(data=df, x='Income', y='LoanAmount', hue='Education')
+plt.title('Applicant Income vs Loan Amount by Education')
+plt.xlabel('Applicant Income')
+plt.ylabel('Loan Amount')
+plt.legend(title='Education')
+plt.show()
+
+
+#train-test split
+X = df[['Income', 'LoanAmount', 'Education']]
+y = df['Default']
+
+X=pd.get_dummies(X, columns=['Education'], drop_first=True)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train the model
+model = LogisticRegression()
+model.fit(X_train, y_train)
+
+# Predict and evaluate
+y_pred = model.predict(X_test)
+coefficients = pd.DataFrame({'Feature': X.columns, 'Coefficient': model.coef_[0]})
+print(coefficients)
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Precision:", precision_score(y_test, y_pred))
+print("Recall:", recall_score(y_test, y_pred))
+print("Classification Report:\n", classification_report(y_test, y_pred))
